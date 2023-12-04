@@ -1,7 +1,7 @@
 # ReadyCheckBot
 Discord bot that can initiate a ready check for those in the voice channel of the person that initiated it
 
-Inspired but FFXIV ready check.
+Inspired by FFXIV ready check.
 Does not include audio files:
 - All_Ready.mp3
 - Not_Ready.mp3
