@@ -1,0 +1,6 @@
+.env
+src/All_Ready.mp3
+src/Not_Ready.mp3
+src/Ready_Check.mp3
+node_modules
+.DS_Store
