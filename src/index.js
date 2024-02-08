@@ -6,6 +6,7 @@ const {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
+  User,
 } = require("discord.js");
 const {
   joinVoiceChannel,
@@ -46,7 +47,8 @@ const player = createAudioPlayer({
     noSubscriber: NoSubscriberBehavior.Pause,
   },
 });
-
+ var MemberCheckState ={};
+ var waitTime = 30;
 client.on("interactionCreate", async (interaction) => {
   if (interaction.isChatInputCommand()) {
     if (
@@ -56,22 +58,33 @@ client.on("interactionCreate", async (interaction) => {
     ) {
       ReadyCount = 0;
       NotReadyCount = 0;
-      
+      waitTime = 30;
+
       var voiceChannel = await interaction.member.voice.channel;
       if (!voiceChannel) return;
+      
+     
+      //console.log(interaction.member.id);
+      voiceChannel.members.forEach(member => {
+        //console.log(member.id);
+        MemberCheckState[member.id] =  false;
+      });
+      MemberCheckState[interaction.member.id] = true;
+
+      //console.log(MemberCheckState[interaction.member.id]);
       var memberCount = voiceChannel.members.size - 1;
-      console.log(voiceChannel.members.size - 1);
+      //console.log(voiceChannel.members.size - 1);
 
       const row = new ActionRowBuilder();
 
-      readystate.forEach((state) => {
+      
         row.components.push(
           new ButtonBuilder()
-            .setLabel(state.Label)
-            .setStyle(state.ButtonStyle)
-            .setCustomId(state.id)
+            .setLabel("Vote")
+            .setStyle(ButtonStyle.Success)
+            .setCustomId("3")
         );
-      });
+      
 
       await interaction.reply({
         components: [row],
@@ -90,13 +103,16 @@ client.on("interactionCreate", async (interaction) => {
       player.play(StartReadyCheck);
 
       //TODO: fix this stupid wait statement
-      var waitTime = 0;
-      while (waitTime != 30) {
+      
+      while (waitTime != 0) {
         await wait(1000);
         if (NotReadyCount + ReadyCount >= memberCount) {
-          waitTime = 30;
+          waitTime = 0;
         } else {
-          waitTime += 1;
+          waitTime -= 1;
+          await interaction.editReply({
+            components: [row],
+          });
         }
       }
 
@@ -124,24 +140,79 @@ client.on("interactionCreate", async (interaction) => {
         player.play(ReadyCheckFailed);
       }
 
-      await wait(30000);
+      await wait(5000);
       if(connection) await connection.destroy();
+      await wait(5000);
       await interaction.deleteReply();
     }
   }
+  //Handle Voting Buttons
   if (interaction.isButton()) {
+    
+    if (interaction.customId === "3"){
+      if(MemberCheckState[interaction.member.id] === true) {
+      interaction.reply({
+        content: "You've already voted",
+        ephemeral: true,
+      }); 
+      await wait(5000);
+      await interaction.deleteReply();
+      return;
+    }
+      const row = new ActionRowBuilder();
+
+      readystate.forEach((state) => {
+        row.components.push(
+          new ButtonBuilder()
+            .setLabel(state.Label)
+            .setStyle(state.ButtonStyle)
+            .setCustomId(state.id)
+        );
+      });
+
+      await interaction.reply({
+        components: [row],
+        ephemeral: true,
+      });
+
+      while(MemberCheckState[interaction.member.id] === false){
+        await wait(1);
+      }
+      await interaction.deleteReply();
+    }
+  }
+
+
+  //Handle Voting
+  if (interaction.isButton()) {
+    
+    if (interaction.customId === "3") return;
+    if(MemberCheckState[interaction.member.id] === true){
+      interaction.reply({
+        content: "You've already voted",
+        ephemeral: true,
+      }); 
+      await wait(5000);
+      await interaction.deleteReply();
+      return;
+    }
     if (interaction.customId === "1") {
       ReadyCount += 1;
+      MemberCheckState[interaction.member.id] = true
     }
     if (interaction.customId === "0") {
       NotReadyCount += 1;
+      MemberCheckState[interaction.member.id] = true
     }
-    interaction.reply({
-      content: "Voted (Please don't vote again)",
+    
+    await interaction.reply({
+      content: "Voted",
       ephemeral: true,
     });
-    await wait(5000);
-    await interaction.deleteReply();
+    
+   
+   await wait(5000);
+  await interaction.deleteReply();
   }
 });
 
