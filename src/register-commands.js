@@ -5,42 +5,42 @@ const options = [
     {
         name: 'user1',
         description: 'First User',
-        type: ApplicationCommandOptionType.User,
+        type: 6,
         required: false,
         autocomplete: true
     },
     {
         name: 'user2',
         description: 'Second User',
-        type: ApplicationCommandOptionType.User,
+        type: 6,
         required: false,
         autocomplete: true
     },
     {
         name: 'user3',
         description: 'Third User',
-        type: ApplicationCommandOptionType.User,
+        type: 6,
         required: false,
         autocomplete: true
     },
     {
         name: 'user4',
         description: 'Fourth User',
-        type: ApplicationCommandOptionType.User,
+        type: 6,
         required: false,
         autocomplete: true
     },
     {
         name: 'user5',
         description: 'Fifth User',
-        type: ApplicationCommandOptionType.User,
+        type: 6,
         required: false,
         autocomplete: true
     },
     {
         name: 'user6',
         description: 'Sixth User',
-        type: ApplicationCommandOptionType.User,
+        type:  6,
         required: false,
         autocomplete: true
     }
@@ -49,17 +49,15 @@ const options = [
 const commands = [
     {
         name: 'ready-check',
-        description: 'Initiates a ready check for everyone in a voice channel',
-        options
+        description: 'Initiates a ready check for everyone in a voice channel'
     },
     {
         name: 'readycheck',
-        description: 'Initiates a ready check for everyone in a voice channel',
-        options
+        description: 'Initiates a ready check for everyone in a voice channel'
     },
     {
         name: 'rcheck',
-        description: 'Initiates a ready check for everyone in a voice channel. Can tag up to 6 users in addition to the caller',
+        description: 'Initiates a ready check in a voice channel. Can tag up to 6 users in addition to the caller',
         options
     }
 ];
