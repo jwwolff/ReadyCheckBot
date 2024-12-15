@@ -1,16 +1,3 @@
-const readystate = [
-  {
-    Label: "ready",
-    ButtonStyle: ButtonStyle.Success,
-    id: "1",
-  },
-  {
-    Label: "not ready",
-    ButtonStyle: ButtonStyle.Danger,
-    id: "0",
-  },
-];
-
 function getPrintState(state){
     var outText = 'Ready check bot results: \r\n \r\n';
     state.forEach((s) => {
@@ -25,13 +12,13 @@ function changeStatus(state, memberId, isReady){
     return state;
 }
 
-function addMemberToState(state, id, name){
+function addMemberToState(state, id, name, ready = false){
     if(state.find(s => s.userId === id)) throw new Error(`error: user ${name} already exists in state`);
 
     state.push({
         userId: id,
         memberName: name,
-        ready: false
+        ready
     })
 }
 
