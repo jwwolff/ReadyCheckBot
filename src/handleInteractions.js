@@ -11,8 +11,7 @@ const {
   NoSubscriberBehavior
 } = require("@discordjs/voice");
 const { join } = require("node:path");
-const { changeStatus } = require("./readyCheckState");
-const { addMemberToState } = require("./readyCheckState");
+const { changeStatus, addMemberToState } = require("./readyCheckState");
 const { get } = require("node:http");
 
 var ReadyCount = 0;
@@ -56,6 +55,16 @@ async function startReadyCheckSession(interaction) {
   ReadyCount = 0;
   NotReadyCount = 0;
   waitTime = 30;
+
+  var invokingMember = interaction.member;
+  if (!invokingMember || !invokingMember.user) return;
+
+  var invokingUser = {
+    id: invokingMember.user.id,
+    username: invokingMember.user.username,
+    guildNickname: invokingMember.nick ?? '',
+    globalName: invokingMember.user.global_name ?? '',
+  }
 
   var optionUsers = getOptionUsers(interaction);
   if (optionUsers.length > 0) {
