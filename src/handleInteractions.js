@@ -6,13 +6,15 @@ const {
 } = require("discord.js");
 const {
   joinVoiceChannel,
-  createAudioResource,
   createAudioPlayer,
   NoSubscriberBehavior
 } = require("@discordjs/voice");
-const { join } = require("node:path");
-const { changeStatus, addMemberToState } = require("./readyCheckState");
-const { get } = require("node:http");
+const { changeStatus, addMemberToState } = require("./utility/readyCheckState");
+const { 
+  StartReadyCheck,
+  ReadyCheckPassed,
+  ReadyCheckFailed
+ } = require("./utility/audioResources");
 
 var ReadyCount = 0;
 var NotReadyCount = 0;
@@ -51,7 +53,6 @@ function getOptionUsers(interaction) {
 }
 
 async function startReadyCheckSession(interaction) {
-
   ReadyCount = 0;
   NotReadyCount = 0;
   waitTime = 30;
@@ -62,27 +63,26 @@ async function startReadyCheckSession(interaction) {
   var invokingUser = {
     id: invokingMember.user.id,
     username: invokingMember.user.username,
-    guildNickname: invokingMember.nick ?? '',
-    globalName: invokingMember.user.global_name ?? '',
+    guildNickname: invokingMember.nickname ?? '',
+    globalName: invokingMember.user.globalName ?? '',
   }
 
   var optionUsers = getOptionUsers(interaction);
+  var voiceChannel = await interaction.member?.voice?.channel;
+
   if (optionUsers.length > 0) {
+    addMemberToState(rCheckState, invokingUser.id, invokingUser.username, true);
     optionUsers.forEach((user) => {
       addMemberToState(rCheckState, user.id, user.username);
     });
+  } else if (voiceChannel){
+    voiceChannel.members.forEach(member => {
+      addMemberToState(rCheckState, member.id, member.user.username);
+    });
+    changeStatus(rCheckState, interaction.member.id, true);
   }
-
-  var voiceChannel = await interaction.member?.voice?.channel;
-  if (!voiceChannel) return;
-
-  voiceChannel.members.forEach(member => {
-    addMemberToState(rCheckState, member.id, member.user.username);
-  });
   
-  changeStatus(rCheckState, interaction.member.id, true);
-
-  var memberCount = voiceChannel.members.size - 1;
+  var memberCount = rCheckState.length;
   
   const row = new ActionRowBuilder();
 
@@ -92,7 +92,6 @@ async function startReadyCheckSession(interaction) {
       .setStyle(ButtonStyle.Success)
       .setCustomId("3")
   );
-
 
   await interaction.reply({
     components: [row],
@@ -104,11 +103,9 @@ async function startReadyCheckSession(interaction) {
     guildId: voiceChannel.guild.id,
     adapterCreator: voiceChannel.guild.voiceAdapterCreator,
   });
-  let StartReadyCheck = createAudioResource(
-    join(__dirname, "Ready_Check.mp3")
-  );
+  
   connection.subscribe(player);
-  player.play(StartReadyCheck);
+  player.play(StartReadyCheck());
 
   //TODO: fix this stupid wait statement
 
@@ -130,22 +127,14 @@ async function startReadyCheckSession(interaction) {
       components: [],
     });
 
-    let ReadyCheckPassed = createAudioResource(
-      join(__dirname, "All_Ready.mp3")
-    );
-
-    player.play(ReadyCheckPassed);
+    player.play(ReadyCheckPassed());
   } else {
     await interaction.editReply({
       content: `Ready Check: **FAILED** (${NotReadyCount})`,
       components: [],
     });
 
-    let ReadyCheckFailed = createAudioResource(
-      join(__dirname, "Not_Ready.mp3")
-    );
-
-    player.play(ReadyCheckFailed);
+    player.play(ReadyCheckFailed());
   }
 
   await wait(5000);
@@ -155,16 +144,12 @@ async function startReadyCheckSession(interaction) {
 }
 
 async function handleInteractions(interaction) {
-  //interaction.options.getUser('user1`)...
   if (interaction.isChatInputCommand()) {
-    if (
-      interaction.commandName === "ready-check" ||
-      interaction.commandName === "readycheck" ||
-      interaction.commandName === "rcheck"
-    ) {
+    if (["ready-check", "readycheck", "rcheck"].includes(interaction.commandName)) {
       await startReadyCheckSession(interaction);
     }
   }
+
   //Handle Voting Buttons
   if (interaction.isButton()) {
 

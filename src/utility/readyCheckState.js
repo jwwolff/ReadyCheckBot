@@ -13,7 +13,7 @@ function changeStatus(state, memberId, isReady){
 }
 
 function addMemberToState(state, id, name, ready = false){
-    if(state.find(s => s.userId === id)) throw new Error(`error: user ${name} already exists in state`);
+    if(state.find(s => s.userId === id)) return;
 
     state.push({
         userId: id,
