@@ -12,6 +12,14 @@ function changeStatus(state, memberId, isReady){
     return state;
 }
 
+function setReady(state, memberId){
+    return changeStatus(state, memberId, true);
+}
+
+function setNotReady(state, memberId){
+    return changeStatus(state, memberId, false);
+}
+
 function addMemberToState(state, id, name, ready = false){
     if(state.find(s => s.userId === id)) return;
 
@@ -22,13 +30,24 @@ function addMemberToState(state, id, name, ready = false){
     })
 }
 
+function isReady(state, id){
+    return state.find(s => s.userId === id).ready;
+}
+
 function getReadyCount(state){
     return state.filter(s => s.ready).length;
 }
 
+function getNotReadyCount(state){
+    return state.filter(s => !s.ready).length;
+}
+
 module.exports = {
     getPrintState,
-    changeStatus,
+    setReady,
+    setNotReady,
     addMemberToState,
-    getReadyCount
+    isReady,
+    getReadyCount,
+    getNotReadyCount
 };
