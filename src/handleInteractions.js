@@ -80,6 +80,12 @@ async function startReadyCheckSession(interaction) {
       addMemberToState(rCheckState, member.id, member.user.username);
     });
     changeStatus(rCheckState, interaction.member.id, true);
+  } else {
+    await interaction.reply({
+      content: "You must be in a voice channel to use this command",
+      ephemeral: true,
+    });
+    return;
   }
   
   var memberCount = rCheckState.length;

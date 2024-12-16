@@ -22,8 +22,13 @@ function addMemberToState(state, id, name, ready = false){
     })
 }
 
+function getReadyCount(state){
+    return state.filter(s => s.ready).length;
+}
+
 module.exports = {
     getPrintState,
     changeStatus,
-    addMemberToState
+    addMemberToState,
+    getReadyCount
 };
