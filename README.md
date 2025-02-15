@@ -6,6 +6,7 @@ Does not include audio files:
 - All_Ready.mp3
 - Not_Ready.mp3
 - Ready_Check.mp3
+These audio files will need to be supplied in ./src/assets
 
 It assumes that the person initiating the ready check is ready.
 
