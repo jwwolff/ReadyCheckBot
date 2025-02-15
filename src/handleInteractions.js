@@ -22,7 +22,7 @@ const {
   ReadyCheckFailed
 } = require("./utility/audioResources");
 
-const readystate = [
+const votingButtons = [
   {
     Label: "ready",
     ButtonStyle: ButtonStyle.Success,
@@ -126,7 +126,7 @@ async function startReadyCheckSession(interaction) {
   while (waitTime != 0) {
     await wait(1000);
     // if either everyone is ready, or at leas on person is ready, stop the session
-    if (getReadyCount(rCheckState) >= memberCount || getNotReadyCount(rCheckState) > 0) {
+    if (getReadyCount(rCheckState) >= memberCount) {
       waitTime = 0;
     } else {
       waitTime -= 1;
@@ -179,12 +179,12 @@ async function handleInteractions(interaction) {
       }
       const row = new ActionRowBuilder();
 
-      readystate.forEach((state) => {
+      votingButtons.forEach((btn) => {
         row.components.push(
           new ButtonBuilder()
-            .setLabel(state.Label)
-            .setStyle(state.ButtonStyle)
-            .setCustomId(state.id)
+            .setLabel(btn.Label)
+            .setStyle(btn.ButtonStyle)
+            .setCustomId(btn.id)
         );
       });
 
@@ -196,6 +196,7 @@ async function handleInteractions(interaction) {
       while (!isReady(rCheckState, interaction.member.id)) {
         await wait(1);
       }
+
       await interaction.deleteReply();
     } else {
       if (rCheckState[interaction.member.id] === true) {
