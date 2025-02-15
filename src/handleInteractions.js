@@ -22,9 +22,6 @@ const {
   ReadyCheckFailed
 } = require("./utility/audioResources");
 
-var ReadyCount = 0;
-var NotReadyCount = 0;
-
 const readystate = [
   {
     Label: "ready",
@@ -63,6 +60,7 @@ async function startReadyCheckSession(interaction) {
   ReadyCount = 0;
   NotReadyCount = 0;
   waitTime = 30;
+  rCheckState = [];
   var connection = null;
 
   var invokingMember = interaction.member;
@@ -80,7 +78,7 @@ async function startReadyCheckSession(interaction) {
   voiceEnabled = invokingMemberVoiceChannel ? true : false;
 
   if (optionUsers.length > 0) {
-    addMemberToState(rCheckState, invokingUser.id, invokingUser.username, /* true */);
+    addMemberToState(rCheckState, invokingUser.id, invokingUser.username, true);
     optionUsers.forEach((user) => {
       addMemberToState(rCheckState, user.id, user.username);
     });
@@ -113,7 +111,7 @@ async function startReadyCheckSession(interaction) {
   });
 
   //VC vode
-  if (!voiceEnabled) {
+  if (voiceEnabled) {
     connection = joinVoiceChannel({
       channelId: invokingMemberVoiceChannel.id,
       guildId: invokingMemberVoiceChannel.guild.id,
@@ -127,7 +125,8 @@ async function startReadyCheckSession(interaction) {
 
   while (waitTime != 0) {
     await wait(1000);
-    if (getReadyCount(rCheckState) >= memberCount) {
+    // if either everyone is ready, or at leas on person is ready, stop the session
+    if (getReadyCount(rCheckState) >= memberCount || getNotReadyCount(rCheckState) > 0) {
       waitTime = 0;
     } else {
       waitTime -= 1;
