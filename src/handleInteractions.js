@@ -147,8 +147,10 @@ async function startReadyCheckSession(interaction) {
 
     player.play(ReadyCheckPassed());
   } else {
+    const content = printFailedSessionResult(rCheckState);
+
     await interaction.editReply({
-      content: `Ready Check: **FAILED** (${getNotReadyCount(rCheckState)} not ready) (${getNoVoteCount(rCheckState)} AFK)`,
+      content,
       components: [],
     });
 
@@ -160,6 +162,8 @@ async function startReadyCheckSession(interaction) {
   await wait(5000);
   await interaction.deleteReply();
 }
+
+
 
 async function handleInteractions(interaction) {
   if (interaction.isChatInputCommand()) {
@@ -228,6 +232,27 @@ async function handleInteractions(interaction) {
       await interaction.deleteReply();
     }
   }
+}
+
+function printFailedSessionResult(state){
+  var content = "Ready check failed. \r\n";
+  state.forEach(s => {
+      var readyOutput = ''
+      switch(s.ready){
+        case readyStates.isReady:
+          readyOutput = 'Ready :white_check_mark:'
+          break;
+        case readyStates.notReady:
+          readyOutput = 'Not Ready :x:'
+          break;
+        default:
+          readyOutput = 'AFK :zzz:'
+          break;
+      }
+      content += `${s.memberName}: ${readyOutput} \r\n`;
+    });
+
+    return content;
 }
 
 module.exports = {
