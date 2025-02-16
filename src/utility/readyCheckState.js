@@ -53,6 +53,10 @@ function getNotReadyCount(state){
     return state.filter(s => s.ready === 0).length;
 }
 
+function getNoVoteCount(state){
+    return state.filter(s => s.NoVote === 0).length;
+}
+
 module.exports = {
     getPrintState,
     setReady,
@@ -63,4 +67,5 @@ module.exports = {
     getNotReadyCount,
     readyStates,
     hasVoted,
+    getNoVoteCount
 };

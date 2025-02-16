@@ -17,7 +17,8 @@ const {
   getReadyCount,
   getNotReadyCount,
   readyStates,
-  hasVoted} = require("./utility/readyCheckState");
+  hasVoted,
+  getNoVoteCount} = require("./utility/readyCheckState");
 const {
   StartReadyCheck,
   ReadyCheckPassed,
@@ -147,7 +148,7 @@ async function startReadyCheckSession(interaction) {
     player.play(ReadyCheckPassed());
   } else {
     await interaction.editReply({
-      content: `Ready Check: **FAILED** (${getNotReadyCount(rCheckState)} not ready)`,
+      content: `Ready Check: **FAILED** (${getNotReadyCount(rCheckState)} not ready) (${getNoVoteCount(rCheckState)} not ready)`,
       components: [],
     });
 
