@@ -41,7 +41,7 @@ function isReady(state, id){
     return state.find(s => s.userId === id).ready === readyStates.Ready;
 }
 
-function hasVoted(){
+function hasVoted(state, id){
     return state.find(s => s.userId === id).ready !== readyStates.NoVote
 }
 
@@ -62,5 +62,5 @@ module.exports = {
     getReadyCount,
     getNotReadyCount,
     readyStates,
-    hasVoted
+    hasVoted,
 };
