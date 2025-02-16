@@ -141,7 +141,7 @@ async function startReadyCheckSession(interaction) {
 
   if (getReadyCount(rCheckState) == memberCount) {
     await interaction.editReply({
-      content: "Ready Check: **PASSED**",
+      content: "Ready Check: PASSED :white_check_mark:",
       components: [],
     });
 
@@ -235,7 +235,7 @@ async function handleInteractions(interaction) {
 }
 
 function printFailedSessionResult(state){
-  var content = "Ready check failed. \r\n";
+  var content = "Ready check FAILED :x:. \r\n";
   state.forEach(s => {
       var readyOutput = ''
       switch(s.ready){
