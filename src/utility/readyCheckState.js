@@ -56,5 +56,6 @@ module.exports = {
     addMemberToState,
     isReady,
     getReadyCount,
-    getNotReadyCount
+    getNotReadyCount,
+    readyStates
 };

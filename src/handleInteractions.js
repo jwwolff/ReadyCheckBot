@@ -15,7 +15,8 @@ const {
   addMemberToState, 
   isReady, 
   getReadyCount,
-  getNotReadyCount} = require("./utility/readyCheckState");
+  getNotReadyCount,
+  readyStates} = require("./utility/readyCheckState");
 const {
   StartReadyCheck,
   ReadyCheckPassed,
@@ -78,7 +79,7 @@ async function startReadyCheckSession(interaction) {
   voiceEnabled = invokingMemberVoiceChannel ? true : false;
 
   if (optionUsers.length > 0) {
-    addMemberToState(rCheckState, invokingUser.id, invokingUser.username, true);
+    addMemberToState(rCheckState, invokingUser.id, invokingUser.username, readyStates.Ready);
     optionUsers.forEach((user) => {
       addMemberToState(rCheckState, user.id, user.username);
     });
@@ -196,8 +197,9 @@ async function handleInteractions(interaction) {
       while (!isReady(rCheckState, interaction.member.id)) {
         await wait(1);
       }
-
       await interaction.deleteReply();
+
+
     } else {
       if (rCheckState[interaction.member.id] === true) {
         interaction.reply({
