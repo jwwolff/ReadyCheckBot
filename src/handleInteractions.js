@@ -81,7 +81,7 @@ async function startReadyCheckSession(interaction) {
   voiceEnabled = invokingMemberVoiceChannel ? true : false;
 
   if (optionUsers.length > 0) {
-    addMemberToState(rCheckState, invokingUser.id, invokingUser.username, readyStates.Ready);
+    addMemberToState(rCheckState, invokingUser.id, invokingUser.username, readyStates.isReady);
     optionUsers.forEach((user) => {
       addMemberToState(rCheckState, user.id, user.username);
     });
@@ -148,7 +148,7 @@ async function startReadyCheckSession(interaction) {
     player.play(ReadyCheckPassed());
   } else {
     await interaction.editReply({
-      content: `Ready Check: **FAILED** (${getNotReadyCount(rCheckState)} not ready) (${getNoVoteCount(rCheckState)} not ready)`,
+      content: `Ready Check: **FAILED** (${getNotReadyCount(rCheckState)} not ready) (${getNoVoteCount(rCheckState)} AFK)`,
       components: [],
     });
 

@@ -1,5 +1,5 @@
 const readyStates = Object.freeze({
-    Ready: 1,
+    isReady: 1,
     notReady: 0,
     NoVote: 2
 });
@@ -46,15 +46,15 @@ function hasVoted(state, id){
 }
 
 function getReadyCount(state){
-    return state.filter(s => s.ready === 1).length;
+    return state.filter(s => s.ready === readyStates.isReady).length;
 }
 
 function getNotReadyCount(state){
-    return state.filter(s => s.ready === 0).length;
+    return state.filter(s => s.ready === readyStates.notReady).length;
 }
 
 function getNoVoteCount(state){
-    return state.filter(s => s.NoVote === 0).length;
+    return state.filter(s => s.NoVote === readyStates.NoVote).length;
 }
 
 module.exports = {
