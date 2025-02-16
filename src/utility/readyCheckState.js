@@ -14,17 +14,17 @@ function getPrintState(state){
     return outText;
 }
 
-function changeStatus(state, memberId, isReady){
-    state.find(s => s.userId === memberId).ready = isReady;
+function changeStatus(state, memberId, readyState){
+    state.find(s => s.userId === memberId).ready = readyState;
     return state;
 }
 
 function setReady(state, memberId){
-    return changeStatus(state, memberId, true);
+    return changeStatus(state, memberId, readyStates.isReady);
 }
 
 function setNotReady(state, memberId){
-    return changeStatus(state, memberId, false);
+    return changeStatus(state, memberId, readyStates.notReady);
 }
 
 function addMemberToState(state, id, name, ready = readyStates.NoVote){
