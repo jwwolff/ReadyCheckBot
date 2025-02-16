@@ -126,7 +126,7 @@ async function startReadyCheckSession(interaction) {
   while (waitTime != 0) {
     await wait(1000);
     // if either everyone is ready, or at leas on person is ready, stop the session
-    if (getReadyCount(rCheckState) >= memberCount) {
+    if (getReadyCount(rCheckState) + getNotReadyCount(rCheckState) >= memberCount) {
       waitTime = 0;
     } else {
       waitTime -= 1;

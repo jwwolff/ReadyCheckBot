@@ -1,3 +1,10 @@
+const readyStates = Object.freeze({
+    Ready: 1,
+    notReady: 0,
+    NoVote: 2
+});
+
+
 function getPrintState(state){
     var outText = 'Ready check bot results: \r\n \r\n';
     state.forEach((s) => {
@@ -20,7 +27,7 @@ function setNotReady(state, memberId){
     return changeStatus(state, memberId, false);
 }
 
-function addMemberToState(state, id, name, ready = false){
+function addMemberToState(state, id, name, ready = readyStates.NoVote){
     if(state.find(s => s.userId === id)) return;
 
     state.push({
@@ -35,11 +42,11 @@ function isReady(state, id){
 }
 
 function getReadyCount(state){
-    return state.filter(s => s.ready).length;
+    return state.filter(s => s.ready === 1).length;
 }
 
 function getNotReadyCount(state){
-    return state.filter(s => !s.ready).length;
+    return state.filter(s => s.ready === 0).length;
 }
 
 module.exports = {
