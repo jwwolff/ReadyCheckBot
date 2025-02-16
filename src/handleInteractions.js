@@ -16,7 +16,8 @@ const {
   isReady, 
   getReadyCount,
   getNotReadyCount,
-  readyStates} = require("./utility/readyCheckState");
+  readyStates,
+  hasVoted} = require("./utility/readyCheckState");
 const {
   StartReadyCheck,
   ReadyCheckPassed,
@@ -169,7 +170,7 @@ async function handleInteractions(interaction) {
   //Handle Voting Buttons
   if (interaction.isButton()) {
     if (interaction.customId === "3") {
-      if (isReady(rCheckState, interaction.member.id)) {
+      if (hasVoted(rCheckState, interaction.member.id)) {
         interaction.reply({
           content: "You've already voted",
           ephemeral: true,
@@ -194,14 +195,14 @@ async function handleInteractions(interaction) {
         ephemeral: true,
       });
 
-      while (!isReady(rCheckState, interaction.member.id)) {
+      while(!hasVoted(rCheckState, interaction.member.id)) {
         await wait(1);
       }
       await interaction.deleteReply();
 
 
     } else {
-      if (rCheckState[interaction.member.id] === true) {
+      if (hasVoted(rCheckState, interaction.member.id)) {
         interaction.reply({
           content: "You've already voted",
           ephemeral: true,

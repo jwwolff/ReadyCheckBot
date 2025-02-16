@@ -38,7 +38,11 @@ function addMemberToState(state, id, name, ready = readyStates.NoVote){
 }
 
 function isReady(state, id){
-    return state.find(s => s.userId === id).ready;
+    return state.find(s => s.userId === id).ready === readyStates.Ready;
+}
+
+function hasVoted(){
+    return state.find(s => s.userId === id).ready !== readyStates.NoVote
 }
 
 function getReadyCount(state){
@@ -57,5 +61,6 @@ module.exports = {
     isReady,
     getReadyCount,
     getNotReadyCount,
-    readyStates
+    readyStates,
+    hasVoted
 };
