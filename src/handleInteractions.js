@@ -26,8 +26,6 @@ const {
 } = require("./utility/audioResources");
 const { printFailedSessionResult } = require("./utility/sessionResults");
 
-const { readyStates } = require("./utility/readyCheckState");
-
 const votingButtons = [
   {
     Label: "ready",
