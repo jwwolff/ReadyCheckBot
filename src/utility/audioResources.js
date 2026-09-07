@@ -1,17 +1,21 @@
 const { createAudioResource } = require("@discordjs/voice");
 const { join } = require("node:path");
 
-const StartReadyCheck = () => createAudioResource(
-    join(__dirname, "../assets/Ready_Check.mp3")
-);
+console.log("[audio] Loading audio resources...");
 
-const ReadyCheckPassed = () => createAudioResource(
-    join(__dirname, "../assets/All_Ready.mp3")
-);
+const resourcePaths = {
+    StartReadyCheck: join(__dirname, "../assets/Ready_Check.opus"),
+    ReadyCheckPassed: join(__dirname, "../assets/All_Ready.opus"),
+    ReadyCheckFailed: join(__dirname, "../assets/Not_Ready.opus"),
+};
 
-const ReadyCheckFailed = () => createAudioResource(
-    join(__dirname, "../assets/Not_Ready.mp3")
-);
+Object.keys(resourcePaths).forEach(key => {
+  console.log("[audio]   " + key + ": " + resourcePaths[key]);
+});
+
+const StartReadyCheck = () => createAudioResource(resourcePaths.StartReadyCheck);
+const ReadyCheckPassed = () => createAudioResource(resourcePaths.ReadyCheckPassed);
+const ReadyCheckFailed = () => createAudioResource(resourcePaths.ReadyCheckFailed);
 
 module.exports = {
     StartReadyCheck,

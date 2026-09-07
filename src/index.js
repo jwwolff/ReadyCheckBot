@@ -13,9 +13,9 @@ const client = new Client({
     IntentsBitField.Flags.Guilds,
     IntentsBitField.Flags.GuildMembers,
     IntentsBitField.Flags.GuildVoiceStates,
-    //IntentsBitField.Flags.GuildMessages,
-    // IntentsBitField.Flags.GuildMessageReactions,
-  ],
+     //IntentsBitField.Flags.GuildMessages,
+     // IntentsBitField.Flags.GuildMessageReactions,
+   ],
 });
 
 client.on("interactionCreate", handleInteractions);

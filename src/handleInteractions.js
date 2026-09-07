@@ -36,13 +36,13 @@ const votingButtons = [
     Label: "not ready",
     ButtonStyle: ButtonStyle.Danger,
     id: "0",
-  },
+   },
 ];
 
 const player = createAudioPlayer({
   behaviors: {
     noSubscriber: NoSubscriberBehavior.Pause,
-  },
+   },
 });
 
 var rCheckState = [];
@@ -55,8 +55,8 @@ function getOptionUsers(interaction) {
     var user = interaction.options.getUser(`user${i}`);
     if (user) {
       optionUsers.push(user);
-    }
-  }
+     }
+   }
   return optionUsers;
 }
 
@@ -66,6 +66,7 @@ async function startReadyCheckSession(interaction) {
   waitTime = 30;
   rCheckState = [];
   var connection = null;
+  let sessionPlayer = null;
 
   var invokingMember = interaction.member;
   if (!invokingMember || !invokingMember.user) return;
@@ -75,7 +76,7 @@ async function startReadyCheckSession(interaction) {
     username: invokingMember.user.username,
     guildNickname: invokingMember.nickname ?? '',
     globalName: invokingMember.user.globalName ?? '',
-  }
+   }
 
   var optionUsers = getOptionUsers(interaction);
   var invokingMemberVoiceChannel = await interaction.member?.voice?.channel;
@@ -85,19 +86,19 @@ async function startReadyCheckSession(interaction) {
     addMemberToState(rCheckState, invokingUser.id, invokingUser.username, readyStates.isReady);
     optionUsers.forEach((user) => {
       addMemberToState(rCheckState, user.id, user.username);
-    });
-  } else if (invokingMemberVoiceChannel) {
+     });
+   } else if (invokingMemberVoiceChannel) {
     invokingMemberVoiceChannel.members.forEach(member => {
       addMemberToState(rCheckState, member.id, member.user.username);
-    });
+     });
     setReady(rCheckState, interaction.member.id);
-  } else {
+   } else {
     await interaction.reply({
       content: "You must be in a voice channel or target users to use this command",
       ephemeral: true,
-    });
+     });
     return;
-  }
+   }
 
   var memberCount = rCheckState.length;
 
@@ -105,58 +106,117 @@ async function startReadyCheckSession(interaction) {
 
   row.components.push(
     new ButtonBuilder()
-      .setLabel("Vote")
-      .setStyle(ButtonStyle.Success)
-      .setCustomId("3")
-  );
+       .setLabel("Vote")
+       .setStyle(ButtonStyle.Success)
+       .setCustomId("3")
+   );
 
   await interaction.reply({
     components: [row],
-  });
+   });
 
-  //VC vode
+  //VC vote
   if (voiceEnabled) {
-    connection = joinVoiceChannel({
-      channelId: invokingMemberVoiceChannel.id,
-      guildId: invokingMemberVoiceChannel.guild.id,
-      adapterCreator: invokingMemberVoiceChannel.guild.voiceAdapterCreator,
-    });
+    try {
+      console.log("[readycheck] Joining voice channel...");
+      connection = joinVoiceChannel({
+        channelId: invokingMemberVoiceChannel.id,
+        guildId: invokingMemberVoiceChannel.guild.id,
+        adapterCreator: invokingMemberVoiceChannel.guild.voiceAdapterCreator,
+       });
 
-    connection.subscribe(player);
-    player.play(StartReadyCheck());
-  }
+      sessionPlayer = createAudioPlayer({
+        behaviors: {
+          noSubscriber: NoSubscriberBehavior.Pause,
+          },
+        });
+
+      sessionPlayer.on("error", (e) => console.error("[readycheck] Player error:", e.message));
+      connection.on("stateChange", (oldState, newState) => {
+        console.log("[readycheck] Voice state:", oldState.status, "->", newState.status);
+        if (newState.status === "disconnected") {
+          console.error("[readycheck] Voice disconnected! Code:", newState.reason?.code);
+         }
+       });
+
+      // Wait for the voice connection to be fully established before playing audio
+      await new Promise((resolve, reject) => {
+        const timer = setTimeout(() => {
+          reject(new Error("Voice connection didn't reach ready state within 5 seconds"));
+         }, 5000);
+        connection.on("stateChange", (old, newState) => {
+          console.log("[readycheck] Voice state:", old.status, "->", newState.status);
+          if (newState.status === "ready") {
+            clearTimeout(timer);
+            console.log("[readycheck] Voice connection is ready!");
+            resolve();
+           } else if (newState.status === "disconnected") {
+            clearTimeout(timer);
+            reject(new Error("Voice connection disconnected: " + newState.reason?.code));
+           }
+         });
+       });
+
+      connection.subscribe(sessionPlayer);
+      
+      let resource = await StartReadyCheck();
+      console.log("[readycheck] Starting audio playback - resource edges:", resource.edges?.length);
+      sessionPlayer.play(resource);
+    } catch (err) {
+      console.error("[readycheck] Voice/audio error:", err.message, err.stack);
+      if (connection) {
+        connection.destroy();
+        connection = null;
+      }
+     }
+   }
+
   //TODO: fix this stupid wait statement?
 
   while (waitTime != 0) {
     await wait(1000);
-    // if either everyone is ready, or at leas on person is ready, stop the session
+     // if either everyone is ready, or at leas on person is ready, stop the session
     if (getReadyCount(rCheckState) + getNotReadyCount(rCheckState) >= memberCount) {
       waitTime = 0;
-    } else {
+     } else {
       waitTime -= 1;
       await interaction.editReply({
         components: [row],
-      });
-    }
-  }
+       });
+     }
+   }
 
   if (getReadyCount(rCheckState) == memberCount) {
     await interaction.editReply({
       content: "Ready Check: PASSED :white_check_mark:",
       components: [],
-    });
+     });
 
-    player.play(ReadyCheckPassed());
-  } else {
+     try {
+       let resource = await ReadyCheckPassed();
+       console.log("[readycheck] Playing passed audio - edges:", resource.edges?.length);
+       sessionPlayer.play(resource);
+     } catch (err) {
+       console.error("[readycheck] Pass audio error:", err.message, err.stack);
+     }
+   } else {
     const content = printFailedSessionResult(rCheckState);
 
     await interaction.editReply({
       content,
       components: [],
-    });
+       });
 
-    player.play(ReadyCheckFailed());
-  }
+    if (sessionPlayer) {
+     try {
+       let resource = await ReadyCheckFailed();
+       console.log("[readycheck] Playing failed audio - edges:", resource.edges?.length);
+       sessionPlayer.play(resource);
+     } catch (err) {
+       console.error("[readycheck] Failed audio error:", err.message, err.stack);
+     }
+    }
+   }
 
   await wait(5000);
   if (connection) await connection.destroy();
@@ -170,53 +230,53 @@ async function handleInteractions(interaction) {
   if (interaction.isChatInputCommand()) {
     if (["ready-check", "readycheck", "rcheck"].includes(interaction.commandName)) {
       await startReadyCheckSession(interaction);
-    }
-  }
+     }
+   }
 
-  //Handle Voting Buttons
+   //Handle Voting Buttons
   if (interaction.isButton()) {
     if (interaction.customId === "3") {
       if (hasVoted(rCheckState, interaction.member.id)) {
         interaction.reply({
           content: "You've already voted",
           ephemeral: true,
-        });
+         });
         await wait(5000);
         await interaction.deleteReply();
         return;
-      }
+       }
       const row = new ActionRowBuilder();
 
       votingButtons.forEach((btn) => {
         row.components.push(
           new ButtonBuilder()
-            .setLabel(btn.Label)
-            .setStyle(btn.ButtonStyle)
-            .setCustomId(btn.id)
-        );
-      });
+             .setLabel(btn.Label)
+             .setStyle(btn.ButtonStyle)
+             .setCustomId(btn.id)
+         );
+       });
 
       await interaction.reply({
         components: [row],
         ephemeral: true,
-      });
+       });
 
       while(!hasVoted(rCheckState, interaction.member.id)) {
         await wait(1);
-      }
+       }
       await interaction.deleteReply();
 
 
-    } else {
+     } else {
       if (hasVoted(rCheckState, interaction.member.id)) {
         interaction.reply({
           content: "You've already voted",
           ephemeral: true,
-        });
+         });
         await wait(5000);
         await interaction.deleteReply();
         return;
-      }
+       }
       
       if (interaction.customId === "1")
         setReady(rCheckState, interaction.member.id);
@@ -226,13 +286,13 @@ async function handleInteractions(interaction) {
       await interaction.reply({
         content: "Voted",
         ephemeral: true,
-      });
+       });
   
   
       await wait(5000);
       await interaction.deleteReply();
-    }
-  }
+     }
+   }
 }
 
 module.exports = {

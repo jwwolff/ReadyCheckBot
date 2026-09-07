@@ -10,12 +10,12 @@
   "author": "jwwolff",
   "license": "ISC",
   "dependencies": {
-    "@discordjs/voice": "^0.16.1",
-    "discord-player": "^6.6.6",
-    "discord.js": "^14.14.1",
-    "dotenv": "^16.3.1"
+    "@discordjs/voice": "^0.19.2",
+    "discord-player": "^7.2.0",
+    "discord.js": "^14.27.0",
+    "dotenv": "^17.4.2"
   },
   "devDependencies": {
-    "jest": "^30.4.2"
+    "jest": "^30.5.1"
   }
 }
